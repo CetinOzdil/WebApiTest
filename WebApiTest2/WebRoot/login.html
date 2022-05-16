@@ -1,0 +1,15 @@
+<html>
+<head>
+	<title>Selfhost Login</title>
+	<script>
+		function setCookieAndGo(){
+			document.cookie="testCookie=yay!";
+			window.location.href = "index.html";
+		}
+	</script>
+</head>
+<body>
+	Welcome to selfhost login!<br />
+	<input type="button" onclick="setCookieAndGo()" value="Click for login!" />
+</body>
+</html>

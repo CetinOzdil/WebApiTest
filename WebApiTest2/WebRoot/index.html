@@ -1,0 +1,36 @@
+<html>
+<head>
+    <title>Selfhost Test</title>
+    <script>
+        function loadDoc(address) {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    document.getElementById("demo").innerHTML = this.responseText;
+                }
+            };
+            xhttp.open("GET", address, true);
+            xhttp.send();
+
+            document.getElementById("demo").innerHTML = "Task started...";
+        }
+
+        function logOut() {
+            if (!confirm("Really wanna logout?"))
+                return;
+
+            document.cookie = "testCookie=";
+            window.location.href = "login.html";
+        }
+    </script>
+</head>
+<body>
+    Hello from selfhost!
+    <br /><br />
+    <input type="button" value="Let''s make an API call!" onclick="loadDoc('api/TestContoller/GetTestData')" /> or <input type="button" value="Let''s make an API call 2!" onclick="loadDoc('api/TestContoller/GetTestJSONData')" />
+    <br /><br />
+    <input type="button" value="Wanna logout?" onclick="logOut()" />
+    <br /><br />
+    <div style="color:red" id="demo"></div>
+</body>
+</html>
