@@ -24,11 +24,9 @@ namespace WebApiTest2
         public void Configure(IApplicationBuilder app)
         {
             if (HostingEnvironment.IsDevelopment())
-            {
                 app.UseDeveloperExceptionPage();
-            }
 
-
+            // for testing allow all cors requests
             app.UseCors(x => x
                 .AllowAnyOrigin()
                 .AllowAnyMethod()
@@ -36,14 +34,19 @@ namespace WebApiTest2
 
             app.UseRouting();
             
+            // our authentication middleware
             app.UseJwtAuthMiddleware();
 
+            // define default page as index.html
             var options = new DefaultFilesOptions();
             options.DefaultFileNames.Clear();
             options.DefaultFileNames.Add("index.html");
             app.UseDefaultFiles(options);
+
+            // static file serving
             app.UseFileServer();
 
+            // map controllers
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
         }
 
@@ -52,6 +55,7 @@ namespace WebApiTest2
             services.AddCors();
             services.AddControllers();
 
+            // serve AuthService to controllers etc
             services.AddScoped<IAuthService, AuthService>();
         }
     }

@@ -24,13 +24,10 @@ namespace WebApiTest2.Controller
         [HttpPost("ReqLogin")]
         public IActionResult Login(AuthenticateRequest req)
         {
-            var result = _authService.Authenticate(req);
+            var result = _authService.Authenticate(req, HttpContext);
 
             if (result == null)
                 return BadRequest(new { message = "Username or password is not correct!" });
-
-            if(_authService.UseCookie)
-                HttpContext.Response.Cookies.Append(_authService.CookieName, result.Token);
 
             return Ok(result);
         }

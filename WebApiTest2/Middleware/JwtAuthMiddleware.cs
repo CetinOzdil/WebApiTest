@@ -27,12 +27,16 @@ namespace WebApiTest2.Middleware
 
         public async Task InvokeAsync(HttpContext context, IAuthService authService)
         {
+            // always allow reching to login page
             if (context.Request.Path.Equals(LoginPath, StringComparison.InvariantCultureIgnoreCase))
             {
                 await _next(context);
                 return;
             }
 
+            // if logout requested, remove cookie and redirect
+            // actually this should invalidate token too but
+            // for sake of simplicty it is ignored
             if (context.Request.Path.Equals(LogoutPath, StringComparison.InvariantCultureIgnoreCase))
             {
                 if (authService.UseCookie)
@@ -42,26 +46,32 @@ namespace WebApiTest2.Middleware
                 return;
             }
 
+            // check for header for token
             var token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
 
+            // if token not found and cookies are active check for cookie
             if (string.IsNullOrEmpty(token) || authService.UseCookie)
                 context.Request.Cookies.TryGetValue(authService.CookieName, out token);
 
 
+            // if token is not found
             if (string.IsNullOrEmpty(token))
             {
+                // and not making an let contoller to check authentication because it may be calling Login endpoint
                 if (context.Request.Path.StartsWithSegments(ApiPrefix, StringComparison.InvariantCultureIgnoreCase))
                     await _next(context);
                 else
-                    context.Response.Redirect(LoginPath);
+                    // otherwise redirect to login
+                    context.Response.Redirect(LoginPath); 
 
                 return;
             }
 
             try
             {
+                // check token for user id 
                 var tokenHandler = new JwtSecurityTokenHandler();
-                var key = Encoding.ASCII.GetBytes("BEN_GUVENLI_JWT_SECRET_KEYIM");
+                var key = Encoding.ASCII.GetBytes("BEN_GUVENLI_JWT_SECRET_KEYIM"); // sorry for bleeding eyes :)
                 tokenHandler.ValidateToken(token, new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
@@ -74,36 +84,46 @@ namespace WebApiTest2.Middleware
                 var jwtToken = (JwtSecurityToken)validatedToken;
                 int.TryParse(jwtToken.Claims.First(x => x.Type == "id").Value, out int userId);
 
+                // check if id is valid
                 var user = authService.GetById(userId);
 
+                // if not
                 if (user == null)
                 {
+                    // remove cookie
                     if (authService.UseCookie)
                         context.Response.Cookies.Delete(authService.CookieName);
 
+                    // if this is an api call let controller handle because it may be calling Login endpoint
                     if (context.Request.Path.StartsWithSegments(ApiPrefix, StringComparison.InvariantCultureIgnoreCase))
                         await _next(context);
                     else
+                        // otherwise redirect to login
                         context.Response.Redirect(LoginPath);
 
                     return;
                 }
 
+                // add user info to items so controllers & auth attribute could use it
                 context.Items["User"] = user;
             }
             catch
             {
+                // on exception assume user is not logged in and remove cookie
                 if (authService.UseCookie)
                     context.Response.Cookies.Delete(authService.CookieName);
-
+                
+                // if this is an api call let controller handle because it may be calling Login endpoint
                 if (context.Request.Path.StartsWithSegments(ApiPrefix, StringComparison.InvariantCultureIgnoreCase))
                     await _next(context);
                 else
+                    // otherwise redirect to login
                     context.Response.Redirect(LoginPath);
 
                 return;
             }
 
+            // you are free to go little request :)
             await _next(context);
         }
     }

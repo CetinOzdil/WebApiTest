@@ -1,4 +1,5 @@
-﻿using Microsoft.IdentityModel.Tokens;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
@@ -14,10 +15,16 @@ namespace WebApiTest2.Service
         public bool UseCookie { get; set; } = true;
         public string CookieName { get; set; } = "indas_jwt";
 
-        public AuthenticateResponse Authenticate(AuthenticateRequest authRequest)
+        public AuthenticateResponse Authenticate(AuthenticateRequest authRequest, HttpContext context)
         {
             if (authRequest == null)
+            {
+                // clear then cookie
+                if (UseCookie)
+                    context.Response.Cookies.Delete(this.CookieName);
+
                 return null;
+            }
 
             if (authRequest.Username == "cetin" && authRequest.Password == "123456")
             {
@@ -31,9 +38,19 @@ namespace WebApiTest2.Service
 
                 };
 
-                return new AuthenticateResponse(user, generateJwtToken(user));
+                var token = generateJwtToken(user);
+
+                // cookies are active add respons to cookie
+                if(UseCookie)
+                    context.Response.Cookies.Append(this.CookieName, token);
+
+                return new AuthenticateResponse(user, token);
             }
 
+            // if user could not be found clear the cookie
+            if (UseCookie)
+                context.Response.Cookies.Delete(this.CookieName);
+            
             return null;
         }
 
@@ -72,9 +89,9 @@ namespace WebApiTest2.Service
 
         private string generateJwtToken(User user)
         {
-            // generate token that is valid for 7 days
+            // generate JWT token
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes("BEN_GUVENLI_JWT_SECRET_KEYIM");
+            var key = Encoding.ASCII.GetBytes("BEN_GUVENLI_JWT_SECRET_KEYIM"); // dont forget to use Config file for this :)
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new[] { new Claim("id", user.Id.ToString()) }),
