@@ -30,8 +30,13 @@ namespace WebApiTest2.Controller
                 catch (TaskCanceledException)
                 {
                     Console.WriteLine("Task cancelled!");
-                    return string.Empty;
                 }
+                catch (OperationCanceledException)
+                {
+                    Console.WriteLine("Task cancelled!");
+                }
+
+                return string.Empty;
 
             }, cancellationToken);
         }
@@ -53,9 +58,13 @@ namespace WebApiTest2.Controller
                 catch (TaskCanceledException)
                 {
                     Console.WriteLine("Task cancelled!");
-                    return null;
+                }
+                catch (OperationCanceledException)
+                {
+                    Console.WriteLine("Task cancelled!");
                 }
 
+                return null;
             }, cancellationToken);
         }
     }

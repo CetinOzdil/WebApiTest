@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 using WebApiTest2.Entity;
 using WebApiTest2.Interface;
 
@@ -38,7 +39,7 @@ namespace WebApiTest2.Controller
         [Authorize]
         [HttpGet]
         [Route("GetAll")]
-        public IActionResult GetAll()
+        public IActionResult GetAll(CancellationToken cancellationToken)
         {
             var users = _authService.GetAll();
             return Ok(users);

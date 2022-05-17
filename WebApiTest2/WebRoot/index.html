@@ -2,17 +2,34 @@
 <head>
     <title>Selfhost Index Page</title>
     <script>
-        function loadDoc(address) {
-            var xhttp = new XMLHttpRequest();
-            xhttp.onreadystatechange = function () {
-                if (this.readyState == 4 && this.status == 200) {
-                    document.getElementById("demo").innerHTML = this.responseText;
-                }
-            };
-            xhttp.open("GET", address, true);
-            xhttp.send();
+        let controller; 
+        let signal;
 
-            document.getElementById("demo").innerHTML = "Task started...";
+        function loadDoc(address) {
+            controller = new AbortController();
+            signal = controller.signal;
+
+            document.getElementById("abortButton").disabled = false;
+
+            fetch(address, {
+                method: "GET",
+                signal: signal,
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+            }).then(response => {
+                document.getElementById("abortButton").disabled = true;
+
+                if (!response.ok) {
+                    document.getElementById("demo").innerHTML = response.statusText;
+                    return;
+                }
+
+                response.json().then(data => {
+                    document.getElementById("demo").innerHTML = JSON.stringify(data);
+                });
+            });
         }
 
         function logOut() {
@@ -21,15 +38,24 @@
 
             window.location.href = "logout";
         }
+
+        function abortFetching() {
+            controller.abort();
+            document.getElementById("abortButton").disabled = true;
+        }
     </script>
 </head>
 <body>
-    Hello from selfhost!
-    <br /><br />
-    <input type="button" value="Let''s make an API call!" onclick="loadDoc('api/Test/GetTestData')" /> or <input type="button" value="Let''s make an API call 2!" onclick="loadDoc('api/Test/GetTestJSONData')" />
-    <br /><br />
-    <input type="button" value="Wanna logout?" onclick="logOut()" /> or <a href="test.html">wanna go another page maybe?</a>
-    <br /><br />
+    Hello from selfhost!<br /><br />
+
+    <input type="button" value="Make an API call!" onclick="loadDoc('api/Test/GetTestData')" /> or
+    <input type="button" value="maybe another API call..." onclick="loadDoc('api/Test/GetTestJSONData')" /> or
+    <input type="button" value="another one?" onclick="loadDoc('api/Login/GetAll')" /><br /><br />
+
+    <input id="abortButton" type="button" value="Abort abort abort!" onclick="abortFetching()" disabled /><br /><br />
+
+    <input type="button" value="Wanna logout?" onclick="logOut()" /> or <a href="test.html">wanna go another page maybe?</a><br /><br />
+
     <div style="color:blue" id="demo"></div>
 </body>
 </html>

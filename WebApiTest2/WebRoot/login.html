@@ -16,13 +16,36 @@
                     Username: user,
                     Password: pass
                 })
-            }).then(req => {
-                req.json().then(data => {
+            }).then(response => {
+                if (!response.ok) {
+                    document.getElementById("demo").innerHTML = response.statusText;
+                    response.json().then(data => document.getElementById("demo").innerHTML = data.message);
+                    return;
+                }
+
+                response.json().then((data) => {
                     document.getElementById("demo").innerHTML = JSON.stringify(data);
                     window.setTimeout(() => window.location.href = "index.html", 3500);
                 });
-            }).catch(error => {
-                document.getElementById("demo").innerHTML = error;
+            });
+        }
+
+        function loadDoc(address) {
+            fetch(address, {
+                method: "GET",
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+            }).then(response => {
+                if (!response.ok) {
+                    document.getElementById("demo").innerHTML = response.statusText;
+                    return;
+                }
+
+                response.json().then(data => {
+                    document.getElementById("demo").innerHTML = JSON.stringify(data);
+                });
             });
         }
     </script>
@@ -32,6 +55,12 @@
     Username : <input type="text" id="userName" /><br />
     Password : <input type="password" id="userPass" /><br /><br />
     <input type="button" value="Login!" onclick="checkLogin()" /><br /><br />
+    or you wanna push the limits and ...<br />
+    
+    <input type="button" value="Make an API call!" onclick="loadDoc('api/Test/GetTestData')" /> or
+    <input type="button" value="maybe another API call..." onclick="loadDoc('api/Test/GetTestJSONData')" /> or
+    <input type="button" value="another one?" onclick="loadDoc('api/Login/GetAll')" /><br /><br />
+
     <div style="color:blue" id="demo"></div>
 </body>
 </html>
