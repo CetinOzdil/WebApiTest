@@ -57,13 +57,7 @@ namespace WebApiTest2
 
             services.AddScoped<IAuthService, AuthService>();
 
-            services.AddAuthorization(options =>
-            {
-                options.AddPolicy("Authenticated", policy => policy.RequireAuthenticatedUser());
-            });
-
             services.AddMvc();
-
         }
     }
 }
