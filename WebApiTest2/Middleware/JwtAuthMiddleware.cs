@@ -50,7 +50,7 @@ namespace WebApiTest2.Middleware
             var token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
 
             // if token not found and cookies are active check for cookie
-            if (string.IsNullOrEmpty(token) || authService.UseCookie)
+            if (string.IsNullOrEmpty(token) && authService.UseCookie)
                 context.Request.Cookies.TryGetValue(authService.CookieName, out token);
 
 
