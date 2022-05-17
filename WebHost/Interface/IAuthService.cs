@@ -2,17 +2,16 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using WebApiTest2.Entity;
 
-namespace WebApiTest2.Interface
+namespace WebHoster.Interface
 {
     public interface IAuthService
     {
         public bool UseCookie { get; set; }
         public string CookieName { get; set; }
 
-        AuthenticateResponse Authenticate(AuthenticateRequest authRequest, HttpContext context);
-        IEnumerable<User> GetAll();
-        User GetById(int id);
+        IAuthenticateResponse Authenticate(IAuthenticateRequest authRequest, HttpContext context);
+        IEnumerable<IUser> GetAll();
+        IUser GetById(int id);
     }
 }

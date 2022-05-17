@@ -8,9 +8,10 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
-using WebApiTest2.Interface;
+using WebAuth.Helper;
+using WebHoster.Interface;
 
-namespace WebApiTest2.Middleware
+namespace WebAuth.Middleware
 {
     public class JwtAuthMiddleware
     {
@@ -71,7 +72,7 @@ namespace WebApiTest2.Middleware
             {
                 // check token for user id 
                 var tokenHandler = new JwtSecurityTokenHandler();
-                var key = Encoding.ASCII.GetBytes("BEN_GUVENLI_JWT_SECRET_KEYIM"); // sorry for bleeding eyes :)
+                var key = Encoding.ASCII.GetBytes(Constants.secureKey);
                 tokenHandler.ValidateToken(token, new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,

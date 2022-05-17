@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using WebHoster.Interface;
 
-namespace TestApp.Entity
+namespace WebAuth.Entity
 {
     public class AuthenticateResponse : IAuthenticateResponse
     {

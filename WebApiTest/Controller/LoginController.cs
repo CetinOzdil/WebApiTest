@@ -1,13 +1,13 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using WebAuth.Attributes;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
-using WebApiTest2.Entity;
-using WebApiTest2.Interface;
+using WebAuth.Entity;
+using WebHoster.Interface;
 
-namespace WebApiTest2.Controller
+namespace WebApiTest.Controller
 {
     [ApiController]
     [Route("api/[controller]")]
@@ -20,7 +20,7 @@ namespace WebApiTest2.Controller
             _authService = authService;
         }
 
-        [AllowAnonymous]
+        
         [HttpPost("ReqLogin")]
         public IActionResult Login(AuthenticateRequest req)
         {
@@ -31,7 +31,6 @@ namespace WebApiTest2.Controller
 
             return Ok(result);
         }
-
 
         [Authorize]
         [HttpGet]

@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
+using WebHoster.Interface;
 
-namespace WebApiTest2.Entity
+namespace WebAuth.Entity
 {
-    public class AuthenticateRequest
+    public class AuthenticateRequest : IAuthenticateRequest
     {
         [Required]
         public string Username { get; set; }

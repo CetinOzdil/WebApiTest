@@ -4,7 +4,7 @@ using System.Text;
 using System.Text.Json.Serialization;
 using WebHoster.Interface;
 
-namespace TestApp.Entity
+namespace WebAuth.Entity
 {
     public class User : IUser
     {

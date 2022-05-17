@@ -19,7 +19,7 @@
             }).then(response => {
                 if (!response.ok) {
                     document.getElementById("demo").innerHTML = response.statusText;
-                    response.json().then(data => document.getElementById("demo").innerHTML = data.message);
+                    response.json().then(data => document.getElementById("demo").innerHTML += ' ' +  data.message);
                     return;
                 }
 

@@ -5,17 +5,17 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using WebApiTest2.Entity;
-using WebApiTest2.Interface;
+using TestApp.Entity;
+using WebHoster.Interface;
 
-namespace WebApiTest2.Service
+namespace TestApp.Service
 {
     public class AuthService : IAuthService
     {
         public bool UseCookie { get; set; } = true;
         public string CookieName { get; set; } = "indas_jwt";
 
-        public AuthenticateResponse Authenticate(AuthenticateRequest authRequest, HttpContext context)
+        public IAuthenticateResponse Authenticate(IAuthenticateRequest authRequest, HttpContext context)
         {
             if (authRequest == null)
             {
@@ -38,11 +38,19 @@ namespace WebApiTest2.Service
 
                 };
 
-                var token = generateJwtToken(user);
+                var token = WebAuth.Helper.JWTHelper.GenerateJwtToken(user, TimeSpan.FromDays(7));
 
                 // cookies are active add respons to cookie
-                if(UseCookie)
-                    context.Response.Cookies.Append(this.CookieName, token);
+                var cookieOption = new CookieOptions()
+                {
+                    Secure = true,
+                    SameSite = SameSiteMode.Strict,
+                    Expires = new DateTimeOffset(DateTime.UtcNow.Add(TimeSpan.FromDays(7))),
+                    MaxAge = TimeSpan.FromDays(7),
+                };
+                
+                if (UseCookie)
+                    context.Response.Cookies.Append(this.CookieName, token, cookieOption);
 
                 return new AuthenticateResponse(user, token);
             }
@@ -54,7 +62,7 @@ namespace WebApiTest2.Service
             return null;
         }
 
-        public IEnumerable<User> GetAll()
+        public IEnumerable<IUser> GetAll()
         {
             var result = new List<User>();
 
@@ -71,7 +79,7 @@ namespace WebApiTest2.Service
             return result;
         }
 
-        public User GetById(int id)
+        public IUser GetById(int id)
         {
             if(id == 666)
                 return new User()
@@ -85,21 +93,6 @@ namespace WebApiTest2.Service
                 };
 
             return null;
-        }
-
-        private string generateJwtToken(User user)
-        {
-            // generate JWT token
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes("BEN_GUVENLI_JWT_SECRET_KEYIM"); // dont forget to use Config file for this :)
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(new[] { new Claim("id", user.Id.ToString()) }),
-                Expires = DateTime.UtcNow.AddDays(7),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-            };
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            return tokenHandler.WriteToken(token);
         }
     }
 }

@@ -4,23 +4,30 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using WebHoster;
 
-namespace WebApiTest2
+namespace WebApiTest
 {
     public class Program
     {
         static async Task Main(string[] args)
         {
-            await CreateHostBuilder(args).Build().RunAsync();
+            var host = new WebBuilder().UseRelaxedCorsPolicy(true)
+                                       .UseWebRoot(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "WebRoot"))
+                                       .UseWebAuthInjection(new WebAuth.StartupInjection())
+                                       .UseAppInjection(new TestApp.StartupInjection())
+                                       .Get()
+                                       .UseUrls(@"http://localhost:5000");
+            
+            var host2 = new WebBuilder().UseRelaxedCorsPolicy(true)
+                                       .UseAppInjection(new TestApp.StartupInjection2())
+                                       .Get()
+                                       .UseUrls(@"http://localhost:5001");
 
-            await Task.Delay(Timeout.Infinite);
-        }
+            await host.Build().StartAsync();
+            await host2.Build().RunAsync();
 
-        private static IWebHostBuilder CreateHostBuilder(string[] args)
-        {
-            return WebHost.CreateDefaultBuilder(args)
-                          .UseWebRoot(Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"WebRoot"))
-                          .UseStartup<Startup>();
+            //await Task.Delay(Timeout.Infinite);
         }
     }
 }
