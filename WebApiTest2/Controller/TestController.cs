@@ -9,10 +9,10 @@ using System.Threading.Tasks;
 namespace WebApiTest2.Controller
 {
     [ApiController]
-    [Authorize]
     [Route("api/[controller]")]
     public class TestController : ControllerBase
     {
+        [Authorize]
         [HttpGet]
         [Route("GetTestData")]
         public async Task<string> TestData(CancellationToken cancellationToken)
@@ -41,6 +41,7 @@ namespace WebApiTest2.Controller
             }, cancellationToken);
         }
 
+        [Authorize]
         [HttpGet]
         [Route("GetTestJSONData")]
         public async Task<object> JsonTestData(CancellationToken cancellationToken)
@@ -65,6 +66,16 @@ namespace WebApiTest2.Controller
                 }
 
                 return null;
+            }, cancellationToken);
+        }
+
+        [HttpGet]
+        [Route("GetTestAnonymousData")]
+        public async Task<string> GetAnonData(CancellationToken cancellationToken)
+        {
+            return await Task.Run(() =>
+            {
+                return "Sorry i don't have so much info for you";
             }, cancellationToken);
         }
     }

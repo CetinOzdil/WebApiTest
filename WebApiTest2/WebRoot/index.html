@@ -5,7 +5,7 @@
         let controller; 
         let signal;
 
-        function loadDoc(address) {
+        function sendRequest(address) {
             controller = new AbortController();
             signal = controller.signal;
 
@@ -48,9 +48,9 @@
 <body>
     Hello from selfhost!<br /><br />
 
-    <input type="button" value="Make an API call!" onclick="loadDoc('api/Test/GetTestData')" /> or
-    <input type="button" value="maybe another API call..." onclick="loadDoc('api/Test/GetTestJSONData')" /> or
-    <input type="button" value="another one?" onclick="loadDoc('api/Login/GetAll')" /><br /><br />
+    <input type="button" value="Make an API call!" onclick="sendRequest('api/Test/GetTestData')" /> or
+    <input type="button" value="maybe another API call..." onclick="sendRequest('api/Test/GetTestJSONData')" /> or
+    <input type="button" value="another one?" onclick="sendRequest('api/Login/GetAll')" /><br /><br />
 
     <input id="abortButton" type="button" value="Abort abort abort!" onclick="abortFetching()" disabled /><br /><br />
 
