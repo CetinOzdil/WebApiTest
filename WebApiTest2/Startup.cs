@@ -36,9 +36,6 @@ namespace WebApiTest2
 
             app.UseRouting();
             
-            app.UseAuthentication();
-            app.UseAuthorization();
-
             app.UseJwtAuthMiddleware();
 
             var options = new DefaultFilesOptions();
@@ -56,8 +53,6 @@ namespace WebApiTest2
             services.AddControllers();
 
             services.AddScoped<IAuthService, AuthService>();
-
-            services.AddMvc();
         }
     }
 }
