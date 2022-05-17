@@ -1,15 +1,37 @@
 <html>
 <head>
-	<title>Selfhost Login</title>
-	<script>
-		function setCookieAndGo(){
-			document.cookie="testCookie=yay!";
-			window.location.href = "index.html";
-		}
-	</script>
+    <title>Selfhost Login</title>
+    <script>
+        function checkLogin() {
+            const user = document.getElementById("userName").value;
+            const pass = document.getElementById("userPass").value;
+
+            fetch("api/Login/ReqLogin", {
+                method: "POST",
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    Username: user,
+                    Password: pass
+                })
+            }).then(req => {
+                req.json().then(data => {
+                    document.getElementById("demo").innerHTML = JSON.stringify(data);
+                    window.setTimeout(() => window.location.href = "index.html", 3500);
+                });
+            }).catch(error => {
+                document.getElementById("demo").innerHTML = error;
+            });
+        }
+    </script>
 </head>
 <body>
-	Welcome to selfhost login!<br />
-	<input type="button" onclick="setCookieAndGo()" value="Click for login!" />
+    Welcome to selfhost login!<br /><br />
+    Username : <input type="text" id="userName" /><br />
+    Password : <input type="password" id="userPass" /><br /><br />
+    <input type="button" value="Login!" onclick="checkLogin()" /><br /><br />
+    <div style="color:blue" id="demo"></div>
 </body>
 </html>

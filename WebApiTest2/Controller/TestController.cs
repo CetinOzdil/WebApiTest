@@ -1,15 +1,17 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace WebApiTest2
+namespace WebApiTest2.Controller
 {
     [ApiController]
+    [Authorize]
     [Route("api/[controller]")]
-    public class TestContoller : ControllerBase
+    public class TestController : ControllerBase
     {
         [HttpGet]
         [Route("GetTestData")]
