@@ -1,15 +1,12 @@
-﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
-using Microsoft.IdentityModel.Tokens;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
-using System.Net;
-using System.Text;
 using System.Threading.Tasks;
+
+using Microsoft.AspNetCore.Http;
+
 using WebAuth.Helper;
-using WebHoster.Interface;
+using WebHoster.Interface.Authentication;
 
 namespace WebAuth.Middleware
 {
@@ -18,8 +15,9 @@ namespace WebAuth.Middleware
         private readonly RequestDelegate _next;
         public static string LoginPath { get; set; } = "/login.html";
         public static string LogoutPath { get; set; } = "/logout";
-        public static string ApiPrefix { get; set; } = "/api";
-        
+        public static List<string> AllowedPaths { get; set; } = new List<string>();
+
+        private static string ErrorPage401 = "<html><head><link rel=\"preconnect\" href=\"https://fonts.googleapis.com\"><link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin><link href=\"https://fonts.googleapis.com/css2?family=Roboto&display=swap\" rel=\"stylesheet\"><title>Unauthorized user!</title><style>body{margin:0px; padding:0px; font-family:roboto,consolas,arial,verdana}</style></head><body><div style=\"width:100%; height:75px; background-color:#0388d2; color:white; padding:25px; font-size:60px\"><span>Unauthorized</span></div><div style=\"width:100%; height:75px; background-color:#ecfpfc; color:black; padding:25px\"><p>Your user does not have sufficent rights to reach this page.</p><p>You can return to the page you came from by clicking <a href=\"javascript:history.back()\">here</a> or go to login page by clicking <a href=\"##LP##\">here</a></p></div><div style=\"width:100%; height:25px; background-color:#0388d2; color:white; padding-top:7px; padding-left:25px; font-weight:bold\"><span>indas</span></div></body></html>";
 
         public JwtAuthMiddleware(RequestDelegate next)
         {
@@ -47,23 +45,28 @@ namespace WebAuth.Middleware
                 return;
             }
 
+            string token = string.Empty;
+
             // check for header for token
-            var token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+            if(context.Request.Headers.TryGetValue("Authorization", out var bearer) && bearer.Count > 0)
+                token = bearer[0].Split(" ").LastOrDefault();
 
             // if token not found and cookies are active check for cookie
             if (string.IsNullOrEmpty(token) && authService.UseCookie)
                 context.Request.Cookies.TryGetValue(authService.CookieName, out token);
 
-
             // if token is not found
             if (string.IsNullOrEmpty(token))
             {
                 // and not making an let contoller to check authentication because it may be calling Login endpoint
-                if (context.Request.Path.StartsWithSegments(ApiPrefix, StringComparison.InvariantCultureIgnoreCase))
+                if (AllowedPaths.Any(p => context.Request.Path.StartsWithSegments(p, StringComparison.InvariantCultureIgnoreCase)))
                     await _next(context);
                 else
-                    // otherwise redirect to login
-                    context.Response.Redirect(LoginPath); 
+                {
+                    context.Response.ContentType = "text/html";
+                    context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                    await context.Response.WriteAsync(ErrorPage401.Replace("##LP##", LoginPath));
+                }
 
                 return;
             }
@@ -71,22 +74,10 @@ namespace WebAuth.Middleware
             try
             {
                 // check token for user id 
-                var tokenHandler = new JwtSecurityTokenHandler();
-                var key = Encoding.ASCII.GetBytes(Constants.secureKey);
-                tokenHandler.ValidateToken(token, new TokenValidationParameters
-                {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(key),
-                    ValidateIssuer = false,
-                    ValidateAudience = false,
-                    ClockSkew = TimeSpan.Zero
-                }, out SecurityToken validatedToken);
-
-                var jwtToken = (JwtSecurityToken)validatedToken;
-                int.TryParse(jwtToken.Claims.First(x => x.Type == "id").Value, out int userId);
+                var userId = JwtHelper.GetUserIdFromToken(token);
 
                 // check if id is valid
-                var user = authService.GetById(userId);
+                var user = await authService.GetUser(userId);
 
                 // if not
                 if (user == null)
@@ -96,11 +87,14 @@ namespace WebAuth.Middleware
                         context.Response.Cookies.Delete(authService.CookieName);
 
                     // if this is an api call let controller handle because it may be calling Login endpoint
-                    if (context.Request.Path.StartsWithSegments(ApiPrefix, StringComparison.InvariantCultureIgnoreCase))
+                    if (AllowedPaths.Any(p => context.Request.Path.StartsWithSegments(p, StringComparison.InvariantCultureIgnoreCase)))
                         await _next(context);
                     else
-                        // otherwise redirect to login
-                        context.Response.Redirect(LoginPath);
+                    {
+                        context.Response.ContentType = "text/plain";
+                        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                        await context.Response.WriteAsync(ErrorPage401.Replace("##LP##", LoginPath));
+                    }
 
                     return;
                 }
@@ -113,28 +107,22 @@ namespace WebAuth.Middleware
                 // on exception assume user is not logged in and remove cookie
                 if (authService.UseCookie)
                     context.Response.Cookies.Delete(authService.CookieName);
-                
+
                 // if this is an api call let controller handle because it may be calling Login endpoint
-                if (context.Request.Path.StartsWithSegments(ApiPrefix, StringComparison.InvariantCultureIgnoreCase))
+                if (AllowedPaths.Any(p => context.Request.Path.StartsWithSegments(p, StringComparison.InvariantCultureIgnoreCase)))
                     await _next(context);
                 else
-                    // otherwise redirect to login
-                    context.Response.Redirect(LoginPath);
+                {
+                    context.Response.ContentType = "text/plain";
+                    context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                    await context.Response.WriteAsync(ErrorPage401.Replace("##LP##", LoginPath));
+                }
 
                 return;
             }
 
             // you are free to go little request :)
             await _next(context);
-        }
-    }
-
-    public static class JwtAuthMiddlewareExtensions
-    {
-        public static IApplicationBuilder UseJwtAuthMiddleware(
-            this IApplicationBuilder builder)
-        {
-            return builder.UseMiddleware<JwtAuthMiddleware>();
         }
     }
 }

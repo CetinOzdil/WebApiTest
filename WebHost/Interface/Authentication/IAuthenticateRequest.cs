@@ -1,4 +1,4 @@
-﻿namespace WebHoster.Interface
+﻿namespace WebHoster.Interface.Authentication
 {
     public interface IAuthenticateRequest
     {

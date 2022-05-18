@@ -12,7 +12,7 @@ namespace WebApiTest.Controller
     [Route("api/[controller]")]
     public class TestController : ControllerBase
     {
-        [Authorize]
+        [AuthRequired]
         [HttpGet]
         [Route("GetTestData")]
         public async Task<string> TestData(CancellationToken cancellationToken)
@@ -41,7 +41,7 @@ namespace WebApiTest.Controller
             }, cancellationToken);
         }
 
-        [Authorize]
+        [AuthRequired]
         [HttpGet]
         [Route("GetTestJSONData")]
         public async Task<object> JsonTestData(CancellationToken cancellationToken)

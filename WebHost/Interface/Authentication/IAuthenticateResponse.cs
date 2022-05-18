@@ -1,11 +1,12 @@
-﻿namespace WebHoster.Interface
+﻿namespace WebHoster.Interface.Authentication
 {
     public interface IAuthenticateResponse
     {
-        string FirstName { get; set; }
         int Id { get; set; }
+        string FirstName { get; set; }
         string LastName { get; set; }
-        string Token { get; set; }
         string Username { get; set; }
+        string Email { get; set; }
+        string Token { get; set; }
     }
 }

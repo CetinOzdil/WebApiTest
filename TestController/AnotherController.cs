@@ -1,18 +1,16 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System;
 
 namespace TestController
 {
     [ApiController]
-    [Route("api/[controller]")]
-    public class FarkliController : ControllerBase
+    [Route("papi/[controller]")]
+    public class AnotherController : ControllerBase
     {
         [HttpGet]
         [Route("GetString")]
         public IActionResult GetString()
         {
-            return Ok("ben bir stringim");
+            return Ok("I am just a string...");
         }
-
     }
 }

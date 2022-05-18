@@ -5,6 +5,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using WebHoster;
+using WebAuth;
 
 namespace WebApiTest
 {
@@ -12,22 +13,21 @@ namespace WebApiTest
     {
         static async Task Main(string[] args)
         {
+            var authInjection = new WebAuthBuilder().AddAllowedPath("/api")
+                                                    .Get();
+
+            //                                                     .AddAllowedPath("/papi")                                    
+
+
             var host = new WebBuilder().UseRelaxedCorsPolicy(true)
                                        .UseWebRoot(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "WebRoot"))
-                                       .UseWebAuthInjection(new WebAuth.StartupInjection())
+                                       .UseWebAuthInjection(authInjection)
                                        .UseAppInjection(new TestApp.StartupInjection())
-                                       .Get()
-                                       .UseUrls(@"http://localhost:5000");
+                                       .UseSSL(true)
+                                       .Get();
+                                       
             
-            var host2 = new WebBuilder().UseRelaxedCorsPolicy(true)
-                                       .UseAppInjection(new TestApp.StartupInjection2())
-                                       .Get()
-                                       .UseUrls(@"http://localhost:5001");
-
-            await host.Build().StartAsync();
-            await host2.Build().RunAsync();
-
-            //await Task.Delay(Timeout.Infinite);
+            await host.Build().RunAsync();
         }
     }
 }

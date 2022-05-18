@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.ResponseCompression;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
@@ -10,15 +12,18 @@ using WebHoster.Interface;
 
 namespace WebHoster
 {
-    public class Startup
+    internal class Startup
     {
-        internal static IStartupInjection AuthInjection { get; set; }
-        internal static List<IStartupInjection> ApplicationInjection { get; set; } = new List<IStartupInjection>();
-        internal static bool RelaxedCorsPolicy { get; set; }
 
-        public Startup(IWebHostEnvironment env)
+        private readonly IConfiguration config;
+        private readonly IStartupInjectionConfiguration injectionConfig;
+
+        public Startup(IWebHostEnvironment env, IConfiguration configuration, IStartupInjectionConfiguration siConfig)
         {
             HostingEnvironment = env;
+
+            config = configuration;
+            injectionConfig = siConfig;
         }
 
         public IWebHostEnvironment HostingEnvironment { get; }
@@ -28,8 +33,12 @@ namespace WebHoster
             if (HostingEnvironment.IsDevelopment())
                 app.UseDeveloperExceptionPage();
 
+            // if using ssl use redirect too
+            if(config.GetValue<bool>("UseSSL"))
+                app.UseHttpsRedirection();
+
             // for testing allow all cors requests
-            if(RelaxedCorsPolicy)
+            if (config.GetValue<bool>("RelaxedCors"))
             {
                 app.UseCors(x => x
                     .AllowAnyOrigin()
@@ -39,10 +48,10 @@ namespace WebHoster
 
             app.UseRouting();
 
-            if (AuthInjection != null)
-                AuthInjection.InjectConfig(app);
+            if (injectionConfig.AuthInjection != null)
+                injectionConfig.AuthInjection.InjectConfig(app);
 
-            foreach (var item in ApplicationInjection)
+            foreach (var item in injectionConfig.ApplicationInjection)
                 item.InjectConfig(app);
 
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
@@ -50,9 +59,20 @@ namespace WebHoster
 
         public void ConfigureServices(IServiceCollection services)
         {
-            
-            if(RelaxedCorsPolicy)
+            // if using ssl use redirect too
+            if (config.GetValue<bool>("RelaxedCors"))
                 services.AddCors();
+
+            services.AddResponseCaching(options =>
+            {
+                options.SizeLimit = 250;
+            });
+
+            services.AddResponseCompression(options =>
+            {
+                options.Providers.Add<GzipCompressionProvider>();
+                options.Providers.Add<BrotliCompressionProvider>();
+            });
 
             services.AddControllers().AddNewtonsoftJson((options) =>
             {
@@ -60,14 +80,14 @@ namespace WebHoster
                 options.SerializerSettings.Formatting = Formatting.None;
                 options.SerializerSettings.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
                 options.SerializerSettings.DateFormatHandling = DateFormatHandling.IsoDateFormat;
-                options.SerializerSettings.DateParseHandling = DateParseHandling.DateTime;
+                options.SerializerSettings.DateParseHandling = DateParseHandling.DateTimeOffset;
                 options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
             });
 
-            if (AuthInjection != null)
-                AuthInjection.InjectConfigureServices(services);
+            if (injectionConfig.AuthInjection != null)
+                injectionConfig.AuthInjection.InjectConfigureServices(services);
 
-            foreach (var item in ApplicationInjection)
+            foreach (var item in injectionConfig.ApplicationInjection)
                 item.InjectConfigureServices(services);
         }
     }

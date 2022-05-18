@@ -1,11 +1,13 @@
-﻿using WebAuth.Attributes;
-using Microsoft.AspNetCore.Mvc;
-using System;
+﻿using System.Collections;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
+
+using Microsoft.AspNetCore.Mvc;
+using TestApp.Entity;
+using WebAuth.Attributes;
 using WebAuth.Entity;
-using WebHoster.Interface;
+using WebHoster.Interface.Authentication;
 
 namespace WebApiTest.Controller
 {
@@ -22,9 +24,9 @@ namespace WebApiTest.Controller
 
         
         [HttpPost("ReqLogin")]
-        public IActionResult Login(AuthenticateRequest req)
+        public async Task<IActionResult> Login(AuthenticateRequest req)
         {
-            var result = _authService.Authenticate(req, HttpContext);
+            var result = await _authService.Authenticate(req, HttpContext);
 
             if (result == null)
                 return BadRequest(new { message = "Username or password is not correct!" });
@@ -32,13 +34,27 @@ namespace WebApiTest.Controller
             return Ok(result);
         }
 
-        [Authorize]
+        [AuthRequired]
         [HttpGet]
         [Route("GetAll")]
-        public IActionResult GetAll(CancellationToken cancellationToken)
+        public async Task<IEnumerable<IUser>> GetAll(CancellationToken cancellationToken)
         {
-            var users = _authService.GetAll();
-            return Ok(users);
+            return await Task.Run(() =>
+            {
+                var result = new List<User>();
+
+                result.Add(new User()
+                {
+                    Username = "cetin",
+                    Password = "123456",
+                    FirstName = "Çetin",
+                    LastName = "Özdil",
+                    Id = 666
+
+                });
+
+                return result;
+            }, cancellationToken);
         }
     }
 }

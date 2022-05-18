@@ -21,7 +21,7 @@ namespace TestApp
         public void InjectConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-            services.AddMvc().AddApplicationPart(typeof(TestController.FarkliController).Assembly).AddControllersAsServices();
+            services.AddMvc().AddApplicationPart(typeof(TestController.AnotherController).Assembly).AddControllersAsServices();
         }
     }
 }

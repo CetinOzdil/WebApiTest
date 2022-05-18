@@ -1,13 +1,11 @@
-﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
+﻿using System.Reflection;
+
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using System;
-using System.Reflection;
-using System.Text;
+
 using TestApp.Service;
-using WebApiTest.Controller;
 using WebHoster.Interface;
+using WebHoster.Interface.Authentication;
 
 namespace TestApp
 {
@@ -23,14 +21,17 @@ namespace TestApp
 
             // static file serving
             app.UseFileServer();
+            
         }
 
         public void InjectConfigureServices(IServiceCollection services)
         {
             services.AddScoped<IAuthService, AuthService>();
-            services.AddControllers();
-            services.AddMvc().AddApplicationPart(Assembly.GetExecutingAssembly()).AddControllersAsServices();
-            services.AddMvc().AddApplicationPart(typeof(TestController.FarkliController).Assembly).AddControllersAsServices();
+
+            services.AddControllers()
+                    .AddApplicationPart(Assembly.GetExecutingAssembly())
+                    .AddApplicationPart(typeof(TestController.AnotherController).Assembly);
+            
         }
     }
 }

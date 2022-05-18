@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using WebHoster.Interface;
+﻿using WebHoster.Interface.Authentication;
 
 namespace TestApp.Entity
 {
@@ -11,15 +8,17 @@ namespace TestApp.Entity
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string Username { get; set; }
+        public string Email { get; set; }
         public string Token { get; set; }
 
 
-        public AuthenticateResponse(User user, string token)
+        public AuthenticateResponse(IUser user, string token)
         {
             Id = user.Id;
             FirstName = user.FirstName;
             LastName = user.LastName;
             Username = user.Username;
+            Email = user.Email;
             Token = token;
         }
     }

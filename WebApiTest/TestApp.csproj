@@ -34,9 +34,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\TestController\TestController.csproj" />
-    <ProjectReference Include="..\WebAuth\WebAuth.csproj" />
-    <ProjectReference Include="..\WebHost\WebHoster.csproj" />
+	<ProjectReference Include="..\TestController\TestController.csproj" />
+	<ProjectReference Include="..\WebAuth\WebAuth.csproj" />
+	<ProjectReference Include="..\WebHost\WebHoster.csproj" />
   </ItemGroup>
 
 </Project>
