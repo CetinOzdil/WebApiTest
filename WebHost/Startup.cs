@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,62 +19,48 @@ namespace WebHoster
         private readonly IConfiguration config;
         private readonly IStartupInjectionConfiguration injectionConfig;
 
-        public Startup(IWebHostEnvironment env, IConfiguration configuration, IStartupInjectionConfiguration siConfig)
+        public Startup(IWebHostEnvironment env, IConfiguration configuration, IStartupInjectionConfiguration startupInjectionConfig)
         {
             HostingEnvironment = env;
 
             config = configuration;
-            injectionConfig = siConfig;
-        }
-
-        public IWebHostEnvironment HostingEnvironment { get; }
-
-        public void Configure(IApplicationBuilder app)
-        {
-            if (HostingEnvironment.IsDevelopment())
-                app.UseDeveloperExceptionPage();
-
-            // if using ssl use redirect too
-            if(config.GetValue<bool>("UseSSL"))
-                app.UseHttpsRedirection();
-
-            // for testing allow all cors requests
-            if (config.GetValue<bool>("RelaxedCors"))
-            {
-                app.UseCors(x => x
-                    .AllowAnyOrigin()
-                    .AllowAnyMethod()
-                    .AllowAnyHeader());
-            }
-
-            app.UseRouting();
-
-            if (injectionConfig.AuthInjection != null)
-                injectionConfig.AuthInjection.InjectConfig(app);
-
-            foreach (var item in injectionConfig.ApplicationInjection)
-                item.InjectConfig(app);
-
-            app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
+            injectionConfig = startupInjectionConfig;
         }
 
         public void ConfigureServices(IServiceCollection services)
         {
-            // if using ssl use redirect too
-            if (config.GetValue<bool>("RelaxedCors"))
+            // relaxed cors
+            if (config.GetValue<bool>("UseRelaxedCors"))
                 services.AddCors();
+
+            // ssl redirect
+            if (config.GetValue<bool>("UseSSL"))
+            {
+                var sslPort = config.GetValue<int>("SSLport");
+
+                services.AddHttpsRedirection(options =>
+                {
+                    options.HttpsPort = sslPort;
+                    options.RedirectStatusCode = StatusCodes.Status301MovedPermanently;
+                });
+            }
 
             services.AddResponseCaching(options =>
             {
                 options.SizeLimit = 250;
             });
 
-            services.AddResponseCompression(options =>
+            // use compression
+            if (config.GetValue<bool>("UseCompression"))
             {
-                options.Providers.Add<GzipCompressionProvider>();
-                options.Providers.Add<BrotliCompressionProvider>();
-            });
+                services.AddResponseCompression(options =>
+                {
+                    options.Providers.Add<GzipCompressionProvider>();
+                    options.Providers.Add<BrotliCompressionProvider>();
+                });
+            }
 
+            // json config
             services.AddControllers().AddNewtonsoftJson((options) =>
             {
                 options.UseMemberCasing();
@@ -84,11 +71,47 @@ namespace WebHoster
                 options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
             });
 
+            // auth injections
             if (injectionConfig.AuthInjection != null)
                 injectionConfig.AuthInjection.InjectConfigureServices(services);
 
+            // app injections
             foreach (var item in injectionConfig.ApplicationInjection)
                 item.InjectConfigureServices(services);
         }
+
+        public IWebHostEnvironment HostingEnvironment { get; }
+
+        public void Configure(IApplicationBuilder app)
+        {
+            if (HostingEnvironment.IsDevelopment())
+                app.UseDeveloperExceptionPage();
+
+            // if using ssl use redirect too
+            if (config.GetValue<bool>("UseSSL"))
+                app.UseHttpsRedirection();
+
+            // for testing allow all cors requests
+            if (config.GetValue<bool>("UseRelaxedCors"))
+            {
+                app.UseCors(x => x
+                    .AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader());
+            }
+
+            app.UseRouting();
+
+            // auth injections
+            if (injectionConfig.AuthInjection != null)
+                injectionConfig.AuthInjection.InjectConfig(app);
+
+            // app injections
+            foreach (var item in injectionConfig.ApplicationInjection)
+                item.InjectConfig(app);
+
+            app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
+        }
+
     }
 }
