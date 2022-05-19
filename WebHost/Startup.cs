@@ -110,6 +110,18 @@ namespace WebHoster
             foreach (var item in injectionConfig.ApplicationInjection)
                 item.InjectConfig(app);
 
+
+            // define default page as index.html
+            var options = new DefaultFilesOptions();
+            options.DefaultFileNames.Clear();
+            options.DefaultFileNames.Add(config.GetValue<string>("DefaultFile"));
+            app.UseDefaultFiles(options);
+
+            // static file serving
+            if (config.GetValue<bool>("UseFileServer"))
+                app.UseFileServer();
+
+
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
         }
 

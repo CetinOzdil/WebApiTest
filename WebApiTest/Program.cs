@@ -1,11 +1,11 @@
-﻿using Microsoft.AspNetCore;
-using Microsoft.AspNetCore.Hosting;
-using System;
+﻿using System;
 using System.IO;
-using System.Threading;
 using System.Threading.Tasks;
-using WebHoster;
+
+using Microsoft.AspNetCore.Hosting;
+
 using WebAuth;
+using WebHoster;
 
 namespace WebApiTest
 {
@@ -14,16 +14,20 @@ namespace WebApiTest
         static async Task Main(string[] args)
         {
             var authInjection = new WebAuthBuilder().AddAllowedPath("/api")
+                                                    .AddAllowedPath("/papi")
+                                                    .AddAllowedPath("/hubs")
+                                                    .AddPolicyClaimMatches("Admin", "Admin", new [] { "true" })
+                                                    .AddPolicyClaimMatches("FirstQuarter", "BirthMonth", new [] { "Jan", "Feb", "Mar" })
                                                     .Get();
-
-            //                                                     .AddAllowedPath("/papi")                                    
-
 
             var host = new WebBuilder().UseRelaxedCorsPolicy(true)
                                        .UseWebRoot(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "WebRoot"))
                                        .UseWebAuthInjection(authInjection)
                                        .UseAppInjection(new TestApp.StartupInjection())
+                                       .UseAppInjection(new TestSignalRHub.StartupInjection())
                                        .UseSSL(true)
+                                       .UseFileServer(true)
+                                       .UseDefaultFile("index.html")
                                        .Get();
                                        
             

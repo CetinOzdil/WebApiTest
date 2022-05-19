@@ -1,4 +1,7 @@
-﻿namespace WebHoster.Interface.Authentication
+﻿using System.Collections.Generic;
+using System.Security.Claims;
+
+namespace WebHoster.Interface.Authentication
 {
     public interface IUser
     {
@@ -8,5 +11,6 @@
         string Username { get; set; }
         string Password { get; set; }
         string Email { get; set; }
+        List<Claim> Claims { get; set; }
     }
 }

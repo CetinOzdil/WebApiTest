@@ -1,4 +1,4 @@
-﻿using WebAuth.Attributes;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -12,7 +12,7 @@ namespace WebApiTest.Controller
     [Route("api/[controller]")]
     public class TestController : ControllerBase
     {
-        [AuthRequired]
+        [Authorize]
         [HttpGet]
         [Route("GetTestData")]
         public async Task<string> TestData(CancellationToken cancellationToken)
@@ -41,7 +41,7 @@ namespace WebApiTest.Controller
             }, cancellationToken);
         }
 
-        [AuthRequired]
+        [Authorize("FirstQuarter")]
         [HttpGet]
         [Route("GetTestJSONData")]
         public async Task<object> JsonTestData(CancellationToken cancellationToken)

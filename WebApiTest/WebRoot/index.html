@@ -1,8 +1,9 @@
 <html>
 <head>
     <title>Selfhost Index Page</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/3.1.7/signalr.min.js"></script>
     <script>
-        let controller; 
+        let controller;
         let signal;
 
         function sendRequest(address) {
@@ -43,6 +44,36 @@
             controller.abort();
             document.getElementById("abortButton").disabled = true;
         }
+
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/hubs/TestHub")
+            .configureLogging(signalR.LogLevel.Information)
+            .build();
+
+        async function start() {
+            try {
+                await connection.start();
+                document.getElementById("demo3").innerHTML = "SignalR Connected.";
+            } catch (err) {
+                console.log(err);
+                setTimeout(start, 5000);
+            }
+        };
+
+        connection.onclose(async () => {
+            await start();
+        });
+
+        connection.on("ReceiveMessage", (message) => {
+            document.getElementById("demo2").innerHTML = message;
+        });
+
+        // Start the connection.
+        start();
+
+        function GetHubString() {
+            connection.invoke("GetMessages").then(result => document.getElementById("demo3").innerHTML = result);
+        }
     </script>
 </head>
 <body>
@@ -56,6 +87,10 @@
 
     <input type="button" value="Wanna logout?" onclick="logOut()" /> or <a href="test.html">wanna go another page maybe?</a><br /><br />
 
-    <div style="color:blue" id="demo"></div>
+    <div style="color:blue" id="demo"></div><br /><br />
+
+    <input type="button" value="SignalR babe!" onclick="GetHubString()" />
+    <div style="color:blue" id="demo2"></div>
+    <div style="color:blue" id="demo3"></div>
 </body>
 </html>

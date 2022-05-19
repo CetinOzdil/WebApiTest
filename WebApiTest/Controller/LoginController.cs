@@ -3,14 +3,16 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+
 using TestApp.Entity;
-using WebAuth.Attributes;
 using WebAuth.Entity;
 using WebHoster.Interface.Authentication;
 
 namespace WebApiTest.Controller
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class LoginController : ControllerBase
@@ -22,7 +24,7 @@ namespace WebApiTest.Controller
             _authService = authService;
         }
 
-        
+        [AllowAnonymous]
         [HttpPost("ReqLogin")]
         public async Task<IActionResult> Login(AuthenticateRequest req)
         {
@@ -34,7 +36,6 @@ namespace WebApiTest.Controller
             return Ok(result);
         }
 
-        [AuthRequired]
         [HttpGet]
         [Route("GetAll")]
         public async Task<IEnumerable<IUser>> GetAll(CancellationToken cancellationToken)

@@ -35,6 +35,7 @@
 
   <ItemGroup>
 	<ProjectReference Include="..\TestController\TestController.csproj" />
+	<ProjectReference Include="..\TestSignalRHub\TestSignalRHub.csproj" />
 	<ProjectReference Include="..\WebAuth\WebAuth.csproj" />
 	<ProjectReference Include="..\WebHost\WebHoster.csproj" />
   </ItemGroup>

@@ -25,6 +25,8 @@ namespace WebHoster
 
         private bool relaxedCorsPolicy = false;
         private bool useCompression = false;
+        private bool useFileServer = true;
+        private string defaultFile = "index.html";
 
 
         private readonly StartupInjectionConfiguration _startupConfiguration = new StartupInjectionConfiguration();
@@ -68,6 +70,18 @@ namespace WebHoster
         public WebBuilder UseCompression(bool use)
         {
             useCompression = use;
+            return this;
+        }
+
+        public WebBuilder UseFileServer(bool use)
+        {
+            useFileServer = use;
+            return this;
+        }
+
+        public WebBuilder UseDefaultFile(string file)
+        {
+            defaultFile = file;
             return this;
         }
 
@@ -118,6 +132,8 @@ namespace WebHoster
             hostBuilder.UseSetting("SSLport", sslPort.ToString());
             hostBuilder.UseSetting("UseRelaxedCors", relaxedCorsPolicy.ToString());
             hostBuilder.UseSetting("UseCompression", useCompression.ToString());
+            hostBuilder.UseSetting("UseFileServer", useFileServer.ToString());
+            hostBuilder.UseSetting("DefaultFile", defaultFile.ToString());
 
             return hostBuilder.UseStartup<Startup>();
         }

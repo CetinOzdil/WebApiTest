@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using TestApp.Entity;
 using WebHoster.Interface.Authentication;
@@ -25,7 +26,6 @@ namespace TestApp.Service
                         FirstName = "Çetin",
                         LastName = "Özdil",
                         Id = 666
-
                     };
                 }
 
@@ -49,13 +49,20 @@ namespace TestApp.Service
             {
                 if (id == 666)
                 {
+                    var claims = new List<Claim>()
+                    {
+                        new Claim("Admin", "true"),
+                        new Claim("BirthMonth", "Apr")
+                    };
+
                     return new User()
                     {
                         Username = "cetin",
                         Password = "123456",
                         FirstName = "Çetin",
                         LastName = "Özdil",
-                        Id = 666
+                        Id = 666,
+                        Claims = claims
 
                     };
                 }

@@ -1,6 +1,7 @@
 ﻿<html>
 <head>
     <title>Selfhost Login</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.5/signalr.min.js"></script>
     <script>
         function checkLogin() {
             const user = document.getElementById("userName").value;
@@ -19,7 +20,7 @@
             }).then(response => {
                 if (!response.ok) {
                     document.getElementById("demo").innerHTML = response.statusText;
-                    response.json().then(data => document.getElementById("demo").innerHTML += ' ' +  data.message);
+                    response.json().then(data => document.getElementById("demo").innerHTML += ' ' + data.message);
                     return;
                 }
 
@@ -48,6 +49,29 @@
                 });
             });
         }
+
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/hubs/TestHub")
+            .configureLogging(signalR.LogLevel.Information)
+            .build();
+
+        async function start() {
+            try {
+                await connection.start();
+                document.getElementById("demo3").innerHTML = "SignalR Connected.";
+                connection.on("ReceiveMessage", (message) => {
+                    document.getElementById("demo2").innerHTML = message;
+                });
+
+            } catch (err) {
+                document.getElementById("demo3").innerHTML = err;
+            }
+        };
+
+        function GetHubString() {
+            connection.invoke("GetMessages").then(result => document.getElementById("demo2").innerHTML = result).catch(err => document.getElementById("demo3").innerHTML = err);
+        }
+
     </script>
 </head>
 <body>
@@ -61,6 +85,11 @@
     <input type="button" value="this call?" onclick="sendRequest('api/Test/GetTestAnonymousData')" /> ... another one ...
     <input type="button" value="yatta!!" onclick="sendRequest('papi/Another/GetString')" /><br /><br />
 
-    <div style="color:blue" id="demo"></div>
+    <div style="color:blue" id="demo"></div><br />
+
+    <input type="button" value="Start signalR!" onclick="start()" />...<input type="button" value="SignalR babe!" onclick="GetHubString()" /><br />
+    <div style="color:blue" id="demo2"></div><br />
+    <div style="color:red" id="demo3"></div>
+
 </body>
 </html>
