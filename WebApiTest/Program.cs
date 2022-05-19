@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Hosting;
 
 using WebAuth;
 using WebHoster;
+using TestSignalRHub;
+using TestApp.Hub;
 
 namespace WebApiTest
 {
@@ -20,11 +22,17 @@ namespace WebApiTest
                                                     .AddPolicyClaimMatches("FirstQuarter", "BirthMonth", new [] { "Jan", "Feb", "Mar" })
                                                     .Get();
 
+            var hubInjection = new HubBuilder<HubAuth>().UseHubPath("/hubs/TestHub")
+                                                        .UseBaseTypeName()
+                                                        .Get();
+
+            var appInjection = new TestApp.StartupInjection();
+
             var host = new WebBuilder().UseRelaxedCorsPolicy(true)
                                        .UseWebRoot(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "WebRoot"))
                                        .UseWebAuthInjection(authInjection)
-                                       .UseAppInjection(new TestApp.StartupInjection())
-                                       .UseAppInjection(new TestSignalRHub.StartupInjection())
+                                       .UseAppInjection(appInjection)
+                                       .UseAppInjection(hubInjection)
                                        .UseFileServer(true)
                                        .UseDefaultFile("index.html")
                                        .Get();

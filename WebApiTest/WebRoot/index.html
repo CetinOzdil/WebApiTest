@@ -72,7 +72,7 @@
         start();
 
         function GetHubString() {
-            connection.invoke("GetMessages").then(result => document.getElementById("demo3").innerHTML = result);
+            connection.invoke("read", 666).then(result => document.getElementById("demo3").innerHTML = result);
         }
     </script>
 </head>
