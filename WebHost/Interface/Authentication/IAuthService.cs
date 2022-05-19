@@ -43,7 +43,7 @@ namespace WebHoster.Interface.Authentication
                     Secure = true,
                     SameSite = SameSiteMode.Strict,
                     Expires = new DateTimeOffset(DateTime.UtcNow.Add(TokenValidity)),
-                    MaxAge = TimeSpan.FromDays(7),
+                    MaxAge = TokenValidity,
                 };
 
                 context.Response.Cookies.Append(CookieName, token, cookieOption);

@@ -25,7 +25,6 @@ namespace WebApiTest
                                        .UseWebAuthInjection(authInjection)
                                        .UseAppInjection(new TestApp.StartupInjection())
                                        .UseAppInjection(new TestSignalRHub.StartupInjection())
-                                       .UseSSL(true)
                                        .UseFileServer(true)
                                        .UseDefaultFile("index.html")
                                        .Get();

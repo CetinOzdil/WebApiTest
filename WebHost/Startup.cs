@@ -45,10 +45,8 @@ namespace WebHoster
                 });
             }
 
-            services.AddResponseCaching(options =>
-            {
-                options.SizeLimit = 250;
-            });
+            // response cache
+            services.AddResponseCaching(options => options.SizeLimit = 250);
 
             // use compression
             if (config.GetValue<bool>("UseCompression"))
@@ -67,7 +65,7 @@ namespace WebHoster
                 options.SerializerSettings.Formatting = Formatting.None;
                 options.SerializerSettings.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
                 options.SerializerSettings.DateFormatHandling = DateFormatHandling.IsoDateFormat;
-                options.SerializerSettings.DateParseHandling = DateParseHandling.DateTimeOffset;
+                options.SerializerSettings.DateParseHandling = DateParseHandling.DateTimeOffset; // need to check this
                 options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
             });
 
@@ -110,7 +108,6 @@ namespace WebHoster
             foreach (var item in injectionConfig.ApplicationInjection)
                 item.InjectConfig(app);
 
-
             // define default page as index.html
             var options = new DefaultFilesOptions();
             options.DefaultFileNames.Clear();
@@ -120,7 +117,6 @@ namespace WebHoster
             // static file serving
             if (config.GetValue<bool>("UseFileServer"))
                 app.UseFileServer();
-
 
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
         }
