@@ -4,7 +4,7 @@ using System.Text;
 
 namespace WebAuth.Enum
 {
-    public enum AllowType
+    public enum PathType
     {
         /// <summary>
         /// Used for API & Hub endpoints

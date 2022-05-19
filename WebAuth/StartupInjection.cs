@@ -15,10 +15,10 @@ namespace WebAuth
     {
         private readonly string loginPath;
         private readonly string logoutPath;
-        private readonly Dictionary<string, AllowType> allowedPaths;
+        private readonly Dictionary<string, PathType> allowedPaths;
         private readonly Dictionary<KeyValuePair<string, string>, string[]> policyClaimPairs;
 
-        public StartupInjection(string login, string logout, Dictionary<string, AllowType> allowed, Dictionary<KeyValuePair<string, string>, string[]> policyPairs)
+        public StartupInjection(string login, string logout, Dictionary<string, PathType> allowed, Dictionary<KeyValuePair<string, string>, string[]> policyPairs)
         {
             loginPath = login;
             logoutPath = logout;

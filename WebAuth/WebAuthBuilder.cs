@@ -12,7 +12,7 @@ namespace WebAuth
     {
         private string loginPath = "/login.html";
         private string logoutPath = "/logout";
-        private readonly Dictionary<string, AllowType> allowedPaths = new Dictionary<string, AllowType>();
+        private readonly Dictionary<string, PathType> allowedPaths = new Dictionary<string, PathType>();
         private readonly Dictionary<KeyValuePair<string, string>, string[]> policyClaimMathces = new Dictionary<KeyValuePair<string, string>, string[]>();
 
         public WebAuthBuilder UseLoginPath(string loginPath)
@@ -27,13 +27,13 @@ namespace WebAuth
             return this;
         }
 
-        public WebAuthBuilder AddAllowedPath(string path, AllowType allowType)
+        public WebAuthBuilder AddAllowedPath(string path, PathType allowType)
         {
             allowedPaths.TryAdd(path, allowType);
             return this;
         }
 
-        public WebAuthBuilder AddAllowedPaths(IDictionary<string, AllowType> paths)
+        public WebAuthBuilder AddAllowedPaths(IDictionary<string, PathType> paths)
         {
             foreach (var path in paths)
                 allowedPaths.TryAdd(path.Key, path.Value);

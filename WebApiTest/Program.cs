@@ -16,10 +16,10 @@ namespace WebApiTest
     {
         static async Task Main(string[] args)
         {
-            var authInjection = new WebAuthBuilder().AddAllowedPath("/api", AllowType.Endpoint)
-                                                    .AddAllowedPath("/papi", AllowType.Endpoint)
-                                                    .AddAllowedPath("/hubs", AllowType.Endpoint)
-                                                    .AddAllowedPath("/anon", AllowType.Path)
+            var authInjection = new WebAuthBuilder().AddAllowedPath("/api", PathType.Endpoint)
+                                                    .AddAllowedPath("/papi", PathType.Endpoint)
+                                                    .AddAllowedPath("/hubs", PathType.Endpoint)
+                                                    .AddAllowedPath("/anon", PathType.Path)
                                                     .AddPolicyClaimMatches("Admin", "Admin", new [] { "true" })
                                                     .AddPolicyClaimMatches("FirstQuarter", "BirthMonth", new [] { "Jan", "Feb", "Mar" })
                                                     .Get();
