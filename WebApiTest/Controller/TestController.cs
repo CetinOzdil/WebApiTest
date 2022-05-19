@@ -23,9 +23,9 @@ namespace WebApiTest.Controller
 
                 try
                 {
-                    Task.Delay(2500).Wait(cancellationToken);
-                    Console.WriteLine("Task tamamlandı!");
-                    return $"Task started at {start:HH:mm:ss} but now its {DateTime.Now:HH:mm:ss}";
+                    Task.Delay(TimeSpan.FromSeconds(3)).Wait(cancellationToken);
+                    Console.WriteLine("Task completed!");
+                    return $"Task started at {start:HH:mm:ss} but now its {DateTime.Now:HH:mm:ss} and it's completed!";
                 }
                 catch (TaskCanceledException)
                 {
@@ -37,7 +37,6 @@ namespace WebApiTest.Controller
                 }
 
                 return string.Empty;
-
             }, cancellationToken);
         }
 
@@ -53,7 +52,7 @@ namespace WebApiTest.Controller
                 try
                 {
                     Task.Delay(500).Wait(cancellationToken);
-                    Console.WriteLine("Task tamamlandı!");
+                    Console.WriteLine("Task completed!");
                     return new { TaskStart = start, TaskEnd = DateTime.UtcNow, Message = "Task completed!" };
                 }
                 catch (TaskCanceledException)
@@ -73,10 +72,7 @@ namespace WebApiTest.Controller
         [Route("GetTestAnonymousData")]
         public async Task<string> GetAnonData(CancellationToken cancellationToken)
         {
-            return await Task.Run(() =>
-            {
-                return "Sorry i don't have so much info for you";
-            }, cancellationToken);
+            return await Task.Run(() => "Sorry i don't have so much info for you", cancellationToken);
         }
     }
 }

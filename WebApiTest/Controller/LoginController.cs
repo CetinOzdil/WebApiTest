@@ -46,7 +46,6 @@ namespace WebApiTest.Controller
                 var auth = _authService as AuthService;
 
                 return auth.Users.ToArray();
-
             }, cancellationToken);
         }
     }

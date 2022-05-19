@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace TestController
 {
@@ -8,9 +10,9 @@ namespace TestController
     {
         [HttpGet]
         [Route("GetString")]
-        public IActionResult GetString()
+        public async Task<string> GetString(CancellationToken cancellationToken)
         {
-            return Ok("I am just a string...");
+            return await Task.Run(() => "I am just a string...", cancellationToken);
         }
     }
 }

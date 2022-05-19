@@ -1,7 +1,7 @@
 <html>
 <head>
     <title>Selfhost Index Page</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/3.1.7/signalr.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.5/signalr.min.js"></script>
     <script>
         let controller;
         let signal;
@@ -68,16 +68,16 @@
             document.getElementById("demo2").innerHTML = message;
         });
 
-        // Start the connection.
+        // Start the connection immediately
         start();
 
         function GetHubString() {
-            connection.invoke("read", 666).then(result => document.getElementById("demo3").innerHTML = result);
+            connection.invoke("read", 1234).then(result => document.getElementById("demo3").innerHTML = result);
         }
     </script>
 </head>
 <body>
-    Hello from selfhost!<br /><br />
+    Hello from selfhost main page!<br /><br />
 
     <input type="button" value="Make an API call!" onclick="sendRequest('api/Test/GetTestData')" /> or
     <input type="button" value="maybe another API call..." onclick="sendRequest('api/Test/GetTestJSONData')" /> or

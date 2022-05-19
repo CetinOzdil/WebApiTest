@@ -45,7 +45,7 @@
                 }
 
                 response.json().then(data => {
-                    document.getElementById("demo").innerHTML = "ヽ(´▽`)/ Yay!! .. but .. " + JSON.stringify(data);
+                    document.getElementById("demo").innerHTML = "Yay!! But .. " + JSON.stringify(data);
                 });
             });
         }
@@ -69,7 +69,7 @@
         };
 
         function GetHubString() {
-            connection.invoke("read", 99).then(result => document.getElementById("demo2").innerHTML = result).catch(err => document.getElementById("demo3").innerHTML = err);
+            connection.invoke("read", 777).then(result => document.getElementById("demo2").innerHTML = result).catch(err => document.getElementById("demo3").innerHTML = err);
         }
 
     </script>
