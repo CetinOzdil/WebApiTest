@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 using TestApp.Entity;
+using TestApp.Service;
 using WebAuth.Entity;
 using WebHoster.Interface.Authentication;
 
@@ -42,19 +43,10 @@ namespace WebApiTest.Controller
         {
             return await Task.Run(() =>
             {
-                var result = new List<User>();
+                var auth = _authService as AuthService;
 
-                result.Add(new User()
-                {
-                    Username = "cetin",
-                    Password = "123456",
-                    FirstName = "Çetin",
-                    LastName = "Özdil",
-                    Id = 666
+                return auth.Users.ToArray();
 
-                });
-
-                return result;
             }, cancellationToken);
         }
     }

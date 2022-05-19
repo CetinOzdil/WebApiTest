@@ -1,13 +1,11 @@
-﻿using Microsoft.AspNetCore;
+﻿using System.Net;
+
+using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Net;
-using System.Reflection;
-using WebHoster.Interface;
-using WebHoster.Class;
 using Microsoft.Extensions.DependencyInjection;
+
+using WebHoster.Class;
+using WebHoster.Interface;
 
 namespace WebHoster
 {
@@ -43,9 +41,9 @@ namespace WebHoster
             return this;
         }
 
-        public WebBuilder UseRelaxedCorsPolicy(bool relaxedPolicy)
+        public WebBuilder UseRelaxedCorsPolicy()
         {
-            relaxedCorsPolicy = relaxedPolicy;
+            relaxedCorsPolicy = true;
             return this;
         }
 
@@ -67,15 +65,15 @@ namespace WebHoster
             return this;
         }
 
-        public WebBuilder UseCompression(bool use)
+        public WebBuilder UseCompression()
         {
-            useCompression = use;
+            useCompression = true;
             return this;
         }
 
-        public WebBuilder UseFileServer(bool use)
+        public WebBuilder UseFileServer()
         {
-            useFileServer = use;
+            useFileServer = true;
             return this;
         }
 
@@ -85,9 +83,9 @@ namespace WebHoster
             return this;
         }
 
-        public WebBuilder UseSSL(bool useSSL, int port = 443, string certificatePath = "", string certificatePassword = "")
+        public WebBuilder UseSSL(int port = 443, string certificatePath = "", string certificatePassword = "")
         {
-            this.useSSL = useSSL;
+            this.useSSL = true;
             sslPort = port;
             sslCertificatePath = certificatePath;
             sslCertificatePass = certificatePassword;
@@ -127,13 +125,13 @@ namespace WebHoster
             // pass injection info to startup
             hostBuilder.ConfigureServices(sc => sc.AddSingleton<IStartupInjectionConfiguration>(_startupConfiguration));
 
-            // pass ssl info to startup too
+            // pass parameters to startup too
             hostBuilder.UseSetting("UseSSL", sslUse.ToString());
             hostBuilder.UseSetting("SSLport", sslPort.ToString());
             hostBuilder.UseSetting("UseRelaxedCors", relaxedCorsPolicy.ToString());
             hostBuilder.UseSetting("UseCompression", useCompression.ToString());
             hostBuilder.UseSetting("UseFileServer", useFileServer.ToString());
-            hostBuilder.UseSetting("DefaultFile", defaultFile.ToString());
+            hostBuilder.UseSetting("DefaultFile", defaultFile);
 
             return hostBuilder.UseStartup<Startup>();
         }

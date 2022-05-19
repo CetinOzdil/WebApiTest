@@ -11,12 +11,10 @@ namespace WebHoster.Interface.Authentication
         public string CookieName { get; set; }
         public TimeSpan TokenValidity { get; set; }
 
-
         Task<IUser> CheckUser(string username, string pass);
         string GenerateToken(IUser user, TimeSpan validity);
         IAuthenticateResponse GetAuthenticateResponse(IUser user, string token);
         Task<IUser> GetUser(int id);
-
 
         public async Task<IAuthenticateResponse> Authenticate(IAuthenticateRequest authRequest, HttpContext context)
         {

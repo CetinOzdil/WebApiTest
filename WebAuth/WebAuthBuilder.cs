@@ -29,14 +29,12 @@ namespace WebAuth
         public WebAuthBuilder AddAllowedPath(string path)
         {
             allowedPaths.Add(path);
-
             return this;
         }
 
         public WebAuthBuilder AddAllowedPaths(IEnumerable<string> paths)
         {
             allowedPaths.AddRange(paths);
-
             return this;
         }
 
