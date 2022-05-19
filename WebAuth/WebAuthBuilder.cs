@@ -4,6 +4,7 @@ using System.Text;
 using WebHoster.Interface;
 using WebAuth.Middleware;
 using System.Linq;
+using WebAuth.Enum;
 
 namespace WebAuth
 {
@@ -11,7 +12,7 @@ namespace WebAuth
     {
         private string loginPath = "/login.html";
         private string logoutPath = "/logout";
-        private readonly List<string> allowedPaths = new List<string>();
+        private readonly Dictionary<string, AllowType> allowedPaths = new Dictionary<string, AllowType>();
         private readonly Dictionary<KeyValuePair<string, string>, string[]> policyClaimMathces = new Dictionary<KeyValuePair<string, string>, string[]>();
 
         public WebAuthBuilder UseLoginPath(string loginPath)
@@ -26,15 +27,17 @@ namespace WebAuth
             return this;
         }
 
-        public WebAuthBuilder AddAllowedPath(string path)
+        public WebAuthBuilder AddAllowedPath(string path, AllowType allowType)
         {
-            allowedPaths.Add(path);
+            allowedPaths.TryAdd(path, allowType);
             return this;
         }
 
-        public WebAuthBuilder AddAllowedPaths(IEnumerable<string> paths)
+        public WebAuthBuilder AddAllowedPaths(IDictionary<string, AllowType> paths)
         {
-            allowedPaths.AddRange(paths);
+            foreach (var path in paths)
+                allowedPaths.TryAdd(path.Key, path.Value);
+            
             return this;
         }
 

@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
 using Microsoft.AspNetCore.Http;
-
+using WebAuth.Enum;
 using WebAuth.Helper;
 using WebHoster.Interface.Authentication;
 
@@ -17,12 +16,12 @@ namespace WebAuth.Middleware
         private readonly RequestDelegate _next;
         private readonly string loginPath;
         private readonly string logoutPath;
-        private readonly List<string> allowedPaths;
+        private readonly Dictionary<string, AllowType> allowedPaths;
 
         private static string ErrorPage401 = "<html><head><link rel=\"preconnect\" href=\"https://fonts.googleapis.com\"><link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin><link href=\"https://fonts.googleapis.com/css2?family=Roboto&display=swap\" rel=\"stylesheet\"><title>Unauthorized user!</title><style>body{margin:0px; padding:0px; font-family:roboto,consolas,arial,verdana}</style></head><body><div style=\"width:100%; height:75px; background-color:#0388d2; color:white; padding:25px; font-size:60px\"><span>401 Unauthorized</span></div><div style=\"width:100%; height:75px; background-color:#ecfpfc; color:black; padding:25px\"><p>Your user does not have sufficent rights to reach this page.</p><p>You can return to the page you came from by clicking <a href=\"javascript:history.back()\">here</a> or go to login page by clicking <a href=\"##LP##\">here</a></p></div><div style=\"width:100%; height:25px; background-color:#0388d2; color:white; padding-top:7px; padding-left:25px; font-weight:bold\"><span>no worries</span></div></body></html>";
-        private static string ErrorPage500 = "<html><head><link rel=\"preconnect\" href=\"https://fonts.googleapis.com\"><link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin><link href=\"https://fonts.googleapis.com/css2?family=Roboto&display=swap\" rel=\"stylesheet\"><title>Unauthorized user!</title><style>body{margin:0px; padding:0px; font-family:roboto,consolas,arial,verdana}</style></head><body><div style=\"width:100%; height:75px; background-color:#0388d2; color:white; padding:25px; font-size:60px\"><span>500 Internal server error</span></div><div style=\"width:100%; height:75px; background-color:#ecfpfc; color:black; padding:25px\"><p>Server encountered an internal error and was unable to complete your request.</p><p>You can return to the page you came from by clicking <a href=\"javascript:history.back()\">here</a> or reloading page by clicking <a href=\"javascript:location.reload();\">here</a></p></div><div style=\"width:100%; height:25px; background-color:#0388d2; color:white; padding-top:7px; padding-left:25px; font-weight:bold\"><span>no worries</span></div></body></html>";
+        private static string ErrorPage500 = "<html><head><link rel=\"preconnect\" href=\"https://fonts.googleapis.com\"><link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin><link href=\"https://fonts.googleapis.com/css2?family=Roboto&display=swap\" rel=\"stylesheet\"><title>Unauthorized user!</title><style>body{margin:0px; padding:0px; font-family:roboto,consolas,arial,verdana}</style></head><body><div style=\"width:100%; height:75px; background-color:#0388d2; color:white; padding:25px; font-size:60px\"><span>500 Internal server error</span></div><div style=\"width:100%; height:75px; background-color:#ecfpfc; color:black; padding:25px\"><p>Server encountered an internal error and was unable to complete your request.</p><p>You can return to the page you came from by clicking <a href=\"javascript:history.back()\">here</a> or reloading page by clicking <a href=\"javascript:location.reload();\">here</a></p><p>##ERR##</p></div><div style=\"width:100%; height:25px; background-color:#0388d2; color:white; padding-top:7px; padding-left:25px; font-weight:bold\"><span>no worries</span></div></body></html>";
 
-        public JwtAuthMiddleware(RequestDelegate next, string login, string logout, List<string> allowed)
+        public JwtAuthMiddleware(RequestDelegate next, string login, string logout, Dictionary<string, AllowType> allowed)
         {
             loginPath = login;
             logoutPath = logout;
@@ -33,8 +32,9 @@ namespace WebAuth.Middleware
 
         public async Task InvokeAsync(HttpContext context, IAuthService authService)
         {
-            // always allow reching to login page
-            if (context.Request.Path.Equals(loginPath, StringComparison.InvariantCultureIgnoreCase))
+            // always allow reching to login page or any allowed file path
+            if (context.Request.Path.Equals(loginPath, StringComparison.InvariantCultureIgnoreCase) ||
+                allowedPaths.Any(p => p.Value == AllowType.Path && context.Request.Path.StartsWithSegments(p.Key, StringComparison.InvariantCultureIgnoreCase)))
             {
                 await _next(context);
                 return;
@@ -65,8 +65,8 @@ namespace WebAuth.Middleware
             // if token is not found
             if (string.IsNullOrEmpty(token))
             {
-                // and it's an allowed path then let contoller to check authentication
-                if (allowedPaths.Any(p => context.Request.Path.StartsWithSegments(p, StringComparison.InvariantCultureIgnoreCase)))
+                // and it's an allowed endpoint then let contoller to check authentication
+                if (allowedPaths.Any(p => p.Value == AllowType.Endpoint && context.Request.Path.StartsWithSegments(p.Key, StringComparison.InvariantCultureIgnoreCase)))
                     await _next(context);
                 else
                 {
@@ -93,8 +93,8 @@ namespace WebAuth.Middleware
                     if (authService.UseCookie)
                         context.Response.Cookies.Delete(authService.CookieName);
 
-                    // and it's an allowed path then let contoller to check authentication
-                    if (allowedPaths.Any(p => context.Request.Path.StartsWithSegments(p, StringComparison.InvariantCultureIgnoreCase)))
+                    // and if request path is an allowed endpoint then let contoller to check authentication
+                    if (allowedPaths.Any(p => p.Value == AllowType.Endpoint && context.Request.Path.StartsWithSegments(p.Key, StringComparison.InvariantCultureIgnoreCase)))
                         await _next(context);
                     else
                     {
@@ -111,20 +111,21 @@ namespace WebAuth.Middleware
                 var identity = new ClaimsIdentity(user.Claims, "Custom");
                 context.User = new ClaimsPrincipal(identity);
             }
-            catch
+            catch(Exception ex)
             {
                 // on exception assume user is not logged in and remove cookie
                 if (authService.UseCookie)
                     context.Response.Cookies.Delete(authService.CookieName);
 
-                // and it's an allowed path then let contoller to check authentication
-                if (allowedPaths.Any(p => context.Request.Path.StartsWithSegments(p, StringComparison.InvariantCultureIgnoreCase)))
+                // and if request path is an allowed endpoint then let contoller to check authentication
+                if (allowedPaths.Any(p => p.Value == AllowType.Endpoint && context.Request.Path.StartsWithSegments(p.Key, StringComparison.InvariantCultureIgnoreCase)))
                     await _next(context);
                 else
                 {
+                    // send internal server error
                     context.Response.ContentType = "text/html";
                     context.Response.StatusCode = StatusCodes.Status500InternalServerError;
-                    await context.Response.WriteAsync(ErrorPage500);
+                    await context.Response.WriteAsync(ErrorPage500.Replace("##ERR##", ex.Message));
                 }
 
                 return;

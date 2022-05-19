@@ -1,27 +1,6 @@
 <html>
 <head>
     <title>Selfhost Test Page</title>
-    <script>
-        function loadDoc(address) {
-            var xhttp = new XMLHttpRequest();
-            xhttp.onreadystatechange = function () {
-                if (this.readyState == 4 && this.status == 200) {
-                    document.getElementById("demo").innerHTML = this.responseText;
-                }
-            };
-            xhttp.open("GET", address, true);
-            xhttp.send();
-
-            document.getElementById("demo").innerHTML = "Task started...";
-        }
-
-        function logOut() {
-            if (!confirm("Really wanna logout?"))
-                return;
-
-            window.location.href = "logout";
-        }
-    </script>
 </head>
 <body>
     Hello from selfhost test page! Not so much to do here...
@@ -30,6 +9,5 @@
     <br /><br />
     <a href="missing.html">Try a missing page maybe?</a>
     <br /><br />
-
 </body>
 </html>

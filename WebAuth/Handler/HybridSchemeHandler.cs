@@ -8,6 +8,10 @@ using System.Threading.Tasks;
 
 namespace WebAuth.Handler
 {
+    /// <summary>
+    /// Because of custom authorization ASP.NET Core is always returning 500 for rejection
+    /// This class prevents usage of 500 for all and returns 401 or 403 according to situation
+    /// </summary>
     public class HybridSchemeHandler : IAuthenticationHandler
     {
         private HttpContext context;

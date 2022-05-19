@@ -74,7 +74,7 @@ namespace WebAuth.Helper
             }
             catch 
             {
-                //
+                // TODO: some exception logging maybe?
             }
 
             return userId;

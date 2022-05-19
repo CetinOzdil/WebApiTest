@@ -7,6 +7,7 @@ using WebHoster.Interface;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using WebAuth.Handler;
+using WebAuth.Enum;
 
 namespace WebAuth
 {
@@ -14,10 +15,10 @@ namespace WebAuth
     {
         private readonly string loginPath;
         private readonly string logoutPath;
-        private readonly List<string> allowedPaths;
+        private readonly Dictionary<string, AllowType> allowedPaths;
         private readonly Dictionary<KeyValuePair<string, string>, string[]> policyClaimPairs;
 
-        public StartupInjection(string login, string logout, List<string> allowed, Dictionary<KeyValuePair<string, string>, string[]> policyPairs)
+        public StartupInjection(string login, string logout, Dictionary<string, AllowType> allowed, Dictionary<KeyValuePair<string, string>, string[]> policyPairs)
         {
             loginPath = login;
             logoutPath = logout;
