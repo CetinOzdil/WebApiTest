@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using Newtonsoft.Json;
+using System.Collections.Generic;
 using System.Security.Claims;
-using System.Text.Json.Serialization;
 using WebHoster.Interface.Authentication;
 
 namespace TestApp.Entity

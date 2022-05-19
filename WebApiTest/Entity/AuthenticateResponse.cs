@@ -11,7 +11,6 @@ namespace TestApp.Entity
         public string Email { get; set; }
         public string Token { get; set; }
 
-
         public AuthenticateResponse(IUser user, string token)
         {
             Id = user.Id;
